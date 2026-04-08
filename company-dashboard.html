@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTIntern – Employer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--p:#1e40af;--p2:#3b82f6;--pk:#eff6ff;--tx:#1a1e2e;--txm:#5a6278;--bg:#f8f9fc;--wh:#fff;--br:12px;--brl:18px;--suc:#0a7a4d;--err:#e53e3e}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
+
+    nav{background:var(--wh);border-bottom:0.5px solid #dce5f5;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:1rem}
+    .logo{font-family:'Sora',sans-serif;font-weight:700;font-size:20px;color:var(--p);letter-spacing:-0.5px;text-decoration:none;flex-shrink:0}
+    .logo span{color:var(--tx)}
+    .nav-center{display:flex;gap:4px;background:#eff6ff;padding:4px;border-radius:30px}
+    .nav-tab{padding:6px 16px;border-radius:25px;font-size:13px;font-weight:500;cursor:pointer;color:var(--txm);transition:all .2s;border:none;background:transparent;font-family:'DM Sans',sans-serif;white-space:nowrap}
+    .nav-tab.on{background:#fff;color:var(--p);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .post-btn{background:var(--p);color:#fff;border:none;border-radius:20px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s}
+    .post-btn:hover{background:var(--p2)}
+    .avatar{width:34px;height:34px;border-radius:50%;background:var(--p);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+
+    .dash-layout{display:flex;flex:1;min-height:0}
+    .sidebar{width:220px;background:var(--wh);border-right:0.5px solid #dce5f5;padding:1.25rem 0.75rem;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+    .sidebar-label{font-size:10px;font-weight:600;color:#a0aec0;letter-spacing:1px;text-transform:uppercase;padding:0 10px;margin:12px 0 4px}
+    .s-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13px;font-weight:500;color:var(--txm);cursor:pointer;transition:all .18s;border:none;background:transparent;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+    .s-item:hover{background:#eff6ff;color:var(--p)}
+    .s-item.on{background:#eff6ff;color:var(--p)}
+    .s-item .ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+    .s-badge{margin-left:auto;background:#e53e3e;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+    .s-badge.g{background:#0a7a4d}
+
+    .main{flex:1;overflow-y:auto;padding:1.5rem;min-width:0}
+    .view{display:none}
+    .view.on{display:block}
+    .page-hd{margin-bottom:1.5rem}
+    .page-hd h1{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+    .page-hd p{font-size:14px;color:var(--txm)}
+
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem}
+    .stat-card{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:10px}
+    .stat-ico{font-size:20px;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .stat-num{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:var(--tx);line-height:1}
+    .stat-lbl{font-size:12px;color:var(--txm);margin-top:2px}
+    .stat-delta{font-size:11px;color:#0a7a4d;font-weight:500}
+
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+    .sec-head h2{font-family:'Sora',sans-serif;font-size:16px;font-weight:600}
+    .see-all{font-size:12px;color:var(--p);cursor:pointer;font-weight:500;border:none;background:none;font-family:'DM Sans',sans-serif}
+
+    /* POSTING CARDS */
+    .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-bottom:1.5rem}
+    .p-card{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);padding:1.1rem}
+    .p-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .p-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:2px}
+    .p-sub{font-size:12px;color:var(--txm)}
+    .p-status{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+    .ps-active{background:#edfaf4;color:#0a7a4d}
+    .ps-closed{background:#fff5f5;color:#e53e3e}
+    .ps-draft{background:#f5f3fa;color:#7c6b9a}
+    .p-stats-row{display:flex;gap:12px;margin:10px 0;padding:10px 0;border-top:0.5px solid #f0ecf9;border-bottom:0.5px solid #f0ecf9}
+    .p-stat{text-align:center;flex:1}
+    .p-stat .n{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--p)}
+    .p-stat .l{font-size:10px;color:var(--txm)}
+    .p-card-foot{display:flex;gap:6px;margin-top:10px}
+    .p-btn{flex:1;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .p-btn.view{background:#eff6ff;color:var(--p)}
+    .p-btn.view:hover{background:#dbeafe}
+    .p-btn.close-btn{background:#fff5f5;color:#e53e3e}
+    .p-btn.edit{background:#f5f3fa;color:#6C3BFF}
+
+    /* CANDIDATES TABLE */
+    .cand-table{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);overflow:hidden;margin-bottom:1.5rem}
+    .cand-table table{width:100%;border-collapse:collapse}
+    .cand-table th{font-size:11px;font-weight:600;color:var(--txm);text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;background:#f8f9fc;border-bottom:0.5px solid #dce5f5;text-align:left}
+    .cand-table td{font-size:13px;padding:11px 14px;border-bottom:0.5px solid #f0f4fd;color:var(--tx);vertical-align:middle}
+    .cand-table tr:last-child td{border-bottom:none}
+    .cand-table tr:hover td{background:#f8f9fc}
+    .status-pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+    .sp-new{background:#eff6ff;color:#1e40af}
+    .sp-review{background:#fff8f0;color:#c06000}
+    .sp-interview{background:#f3f0ff;color:#6C3BFF}
+    .sp-accepted{background:#edfaf4;color:#0a7a4d}
+    .sp-rejected{background:#fff5f5;color:#e53e3e}
+    .c-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .action-btns{display:flex;gap:5px}
+    .act-btn{border:none;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .act-btn.accept{background:#edfaf4;color:#0a7a4d}
+    .act-btn.reject{background:#fff5f5;color:#e53e3e}
+    .act-btn.interview{background:#eff6ff;color:var(--p)}
+    .act-btn.view{background:#f5f3fa;color:#6b5f7a}
+
+    /* POST FORM */
+    .post-form{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);padding:1.5rem;max-width:700px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .form-group{margin-bottom:10px}
+    label.fl{display:block;font-size:12px;font-weight:600;color:var(--tx);margin-bottom:5px;letter-spacing:.3px}
+    input.fi,select.fi,textarea.fi{width:100%;border:1.5px solid #dce5f5;border-radius:9px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--tx);background:#fff;outline:none;transition:border-color .2s;resize:vertical}
+    input.fi:focus,select.fi:focus,textarea.fi:focus{border-color:var(--p)}
+    .sub-btn{background:var(--p);color:#fff;border:none;border-radius:11px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;margin-top:6px}
+    .sub-btn:hover{background:var(--p2)}
+
+    /* ANALYTICS */
+    .analytics-grid{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:1.5rem}
+    .an-card{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);padding:1.25rem}
+    .funnel-step{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .funnel-label{font-size:13px;font-weight:500;width:140px;flex-shrink:0}
+    .funnel-bar-bg{flex:1;background:#f0f4fd;border-radius:6px;height:24px;overflow:hidden}
+    .funnel-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:600;color:#fff;transition:width .5s}
+    .funnel-count{font-size:13px;font-weight:600;width:30px;text-align:right;flex-shrink:0}
+
+    /* PROFILE */
+    .co-profile{display:grid;grid-template-columns:280px 1fr;gap:10px}
+    .co-card{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);padding:1.5rem;text-align:center}
+    .co-logo-big{width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem}
+    .co-name{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;margin-bottom:2px}
+    .co-type{font-size:13px;color:var(--txm);margin-bottom:12px}
+    .co-stats{display:flex;justify-content:center;gap:1.5rem;padding:1rem 0;border-top:0.5px solid #f0f4fd;border-bottom:0.5px solid #f0f4fd;margin-bottom:1rem}
+    .info-card{background:var(--wh);border:0.5px solid #dce5f5;border-radius:var(--brl);padding:1.25rem}
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid #f0f4fd}
+    .info-row:last-child{border-bottom:none}
+    .info-lbl{font-size:12px;color:var(--txm);font-weight:500}
+    .info-val{font-size:13px;font-weight:500;color:var(--tx)}
+    .edit-btn{width:100%;margin-top:1rem;background:#eff6ff;color:var(--p);border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+    .empty{text-align:center;padding:2.5rem 1rem;color:var(--txm)}
+    .empty div{font-size:36px;margin-bottom:.5rem}
+
+    /* CANDIDATE DETAIL MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:center;justify-content:center}
+    .modal-bg.open{display:flex}
+    .modal{background:#fff;border-radius:20px;padding:1.75rem;max-width:520px;width:92%;max-height:82vh;overflow-y:auto;position:relative}
+    .modal-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--txm)}
+
+    @media(max-width:768px){.sidebar{display:none}.form-grid{grid-template-columns:1fr}.analytics-grid{grid-template-columns:1fr}.co-profile{grid-template-columns:1fr}.nav-center{display:none}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="./internship_portal.html">CT<span>Intern</span></a>
+  <div class="nav-center">
+    <button class="nav-tab on" onclick="sv('home',this)">📊 Dashboard</button>
+    <button class="nav-tab" onclick="sv('postings',this)">📋 Postings</button>
+    <button class="nav-tab" onclick="sv('candidates',this)">👥 Candidates</button>
+    <button class="nav-tab" onclick="sv('post-job',this)">➕ Post Job</button>
+    <button class="nav-tab" onclick="sv('analytics',this)">📈 Analytics</button>
+  </div>
+  <div class="nav-right">
+    <button class="post-btn" onclick="sv('post-job',null)">+ Post Internship</button>
+    <div class="avatar" title="TechNova Solutions">TN</div>
+  </div>
+</nav>
+
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-label">Recruitment</div>
+    <button class="s-item on" onclick="sv('home',null)"><span class="ico">📊</span>Dashboard</button>
+    <button class="s-item" onclick="sv('postings',null)"><span class="ico">📋</span>My Postings</button>
+    <button class="s-item" onclick="sv('candidates',null)"><span class="ico">👥</span>Candidates<span class="s-badge">5</span></button>
+    <button class="s-item" onclick="sv('post-job',null)"><span class="ico">➕</span>Post New Job</button>
+    <button class="s-item" onclick="sv('analytics',null)"><span class="ico">📈</span>Analytics</button>
+    <div class="sidebar-label">Company</div>
+    <button class="s-item" onclick="sv('profile',null)"><span class="ico">🏢</span>Company Profile</button>
+    <div style="flex:1"></div>
+    <button class="s-item" onclick="window.location.href='./ctintern_auth.html'"><span class="ico">🚪</span>Logout</button>
+  </div>
+
+  <div class="main">
+
+    <!-- HOME / DASHBOARD -->
+    <div class="view on" id="view-home">
+      <div style="background:linear-gradient(135deg,#1e40af,#3b82f6);border-radius:18px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:1rem">
+        <div>
+           <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px" id="welcome-text">
+Welcome back, User! 👋
+</div>
+          <div style="font-size:13px;opacity:.85">You have <strong>5 new applications</strong> this week across your active postings.</div>
+        </div>
+        <div style="font-size:48px;flex-shrink:0">🚀</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-ico" style="background:#eff6ff">📋</div><div><div class="stat-num">3</div><div class="stat-lbl">Active Postings</div><div class="stat-delta">↑ 1 this week</div></div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:#f0fdf9">👥</div><div><div class="stat-num">24</div><div class="stat-lbl">Total Applications</div><div class="stat-delta">↑ 5 new</div></div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:#f3f0ff">🎤</div><div><div class="stat-num">4</div><div class="stat-lbl">Interviews Scheduled</div></div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:#edfaf4">✅</div><div><div class="stat-num">2</div><div class="stat-lbl">Hired This Month</div><div class="stat-delta">↑ 2 new</div></div></div>
+      </div>
+
+      <!-- Recent Applications -->
+      <div class="sec-head"><h2>🔔 Recent Applications</h2><button class="see-all" onclick="sv('candidates',null)">View all →</button></div>
+      <div class="cand-table">
+        <table>
+          <thead><tr><th>Candidate</th><th>Applied For</th><th>Applied On</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="recent-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Active Postings Quick View -->
+      <div class="sec-head"><h2>📋 Active Postings</h2><button class="see-all" onclick="sv('postings',null)">Manage →</button></div>
+      <div class="post-grid" id="active-post-grid"></div>
+    </div>
+
+    <!-- POSTINGS -->
+    <div class="view" id="view-postings">
+      <div class="page-hd" style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div><h1>My Postings</h1><p>Manage all your internship and job postings</p></div>
+        <button class="post-btn" onclick="sv('post-job',null)">+ Post New</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem">
+        <button class="nav-tab on" style="border:1px solid #dce5f5;border-radius:20px" onclick="filterPost(this,'all')">All</button>
+        <button class="nav-tab" style="border:1px solid #dce5f5;border-radius:20px" onclick="filterPost(this,'active')">🟢 Active</button>
+        <button class="nav-tab" style="border:1px solid #dce5f5;border-radius:20px" onclick="filterPost(this,'closed')">🔴 Closed</button>
+        <button class="nav-tab" style="border:1px solid #dce5f5;border-radius:20px" onclick="filterPost(this,'draft')">⚪ Draft</button>
+      </div>
+      <div class="post-grid" id="all-post-grid"></div>
+    </div>
+
+    <!-- CANDIDATES -->
+    <div class="view" id="view-candidates">
+      <div class="page-hd"><h1>Candidates</h1><p>Review and manage all applications</p></div>
+      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px;display:flex;align-items:center;background:var(--wh);border:1.5px solid #dce5f5;border-radius:10px;padding:0 12px;gap:8px">
+          <span style="font-size:14px">🔍</span>
+          <input type="text" id="cand-q" placeholder="Search candidate name..." oninput="renderCandidates()" style="flex:1;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--tx);background:transparent;padding:9px 0">
+        </div>
+        <select id="cand-job" onchange="renderCandidates()" style="border:1.5px solid #dce5f5;border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;outline:none;color:var(--tx);cursor:pointer">
+          <option value="">All Postings</option>
+          <option value="1">Frontend Developer Intern</option>
+          <option value="2">Data Science Intern</option>
+          <option value="3">UI/UX Design Intern</option>
+        </select>
+        <select id="cand-status" onchange="renderCandidates()" style="border:1.5px solid #dce5f5;border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;outline:none;color:var(--tx);cursor:pointer">
+          <option value="">All Status</option>
+          <option value="new">New</option>
+          <option value="review">Under Review</option>
+          <option value="interview">Interview</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="cand-table">
+        <table>
+          <thead><tr><th>Candidate</th><th>Applied For</th><th>Applied On</th><th>Skills</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="cand-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POST JOB FORM -->
+    <div class="view" id="view-post-job">
+      <div class="page-hd"><h1>Post New Internship</h1><p>Fill in the details to attract the right candidates</p></div>
+      <div class="post-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="fl">Internship Title *</label>
+            <input class="fi" type="text" placeholder="e.g. Frontend Developer Intern">
+          </div>
+          <div class="form-group">
+            <label class="fl">Category *</label>
+            <select class="fi">
+              <option value="">Select Category</option>
+              <option>Tech</option><option>Design</option><option>Marketing</option><option>Finance</option><option>Operations</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="fl">Location *</label>
+            <select class="fi">
+              <option value="">Select Location</option>
+              <option>Remote</option><option>Delhi</option><option>Bangalore</option><option>Mumbai</option><option>Hyderabad</option><option>Hybrid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="fl">Type *</label>
+            <select class="fi">
+              <option>Full-time</option><option>Part-time</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="fl">Stipend / Salary</label>
+            <input class="fi" type="text" placeholder="e.g. ₹15,000/mo or ₹4.5 LPA">
+          </div>
+          <div class="form-group">
+            <label class="fl">Duration</label>
+            <input class="fi" type="text" placeholder="e.g. 3 months / Permanent">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="fl">No. of Openings</label>
+            <input class="fi" type="number" placeholder="e.g. 2" min="1">
+          </div>
+          <div class="form-group">
+            <label class="fl">Application Deadline *</label>
+            <input class="fi" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="fl">Skills Required</label>
+          <input class="fi" type="text" placeholder="e.g. React, JavaScript, CSS (comma separated)">
+        </div>
+        <div class="form-group">
+          <label class="fl">Job Description *</label>
+          <textarea class="fi" rows="5" placeholder="Describe the role, responsibilities, and what the intern will learn..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="fl">Eligibility / Requirements</label>
+          <textarea class="fi" rows="3" placeholder="e.g. B.Tech/BCA students, 3rd or 4th year, CGPA 7+..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="sub-btn" onclick="handlePost()">🚀 Publish Internship</button>
+          <button style="background:#f0f4fd;color:var(--txm);border:none;border-radius:11px;padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Save as Draft</button>
+        </div>
+        <div id="post-success" style="display:none;margin-top:1rem;background:#edfaf4;border-radius:10px;padding:12px 16px;font-size:13px;color:#0a7a4d;font-weight:500">✅ Internship posted successfully! <a onclick="sv('postings',null)" style="color:var(--p);cursor:pointer;font-weight:600">View Postings →</a></div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="view" id="view-analytics">
+      <div class="page-hd"><h1>Analytics</h1><p>Insights into your hiring pipeline</p></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-ico" style="background:#eff6ff">👁️</div><div><div class="stat-num">342</div><div class="stat-lbl">Total Views</div><div class="stat-delta">↑ 28% this week</div></div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:#f0fdf9">📋</div><div><div class="stat-num">24</div><div class="stat-lbl">Total Applications</div><div class="stat-delta">↑ 5 new</div></div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:#fff8f0">🎤</div><div><div class="stat-num">4</div><div class="stat-lbl">In Interview</div></div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:#edfaf4">✅</div><div><div class="stat-num">2</div><div class="stat-lbl">Hired</div><div class="stat-delta">8.3% hire rate</div></div></div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="an-card">
+          <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:600;margin-bottom:1rem">Hiring Funnel</div>
+          <div class="funnel-step">
+            <div class="funnel-label">Views</div>
+            <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:100%;background:#3b82f6">342</div></div>
+            <div class="funnel-count">342</div>
+          </div>
+          <div class="funnel-step">
+            <div class="funnel-label">Applications</div>
+            <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:70%;background:#8b5cf6">24</div></div>
+            <div class="funnel-count">24</div>
+          </div>
+          <div class="funnel-step">
+            <div class="funnel-label">Shortlisted</div>
+            <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:30%;background:#f59e0b">8</div></div>
+            <div class="funnel-count">8</div>
+          </div>
+          <div class="funnel-step">
+            <div class="funnel-label">Interviewed</div>
+            <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:17%;background:#10b981">4</div></div>
+            <div class="funnel-count">4</div>
+          </div>
+          <div class="funnel-step">
+            <div class="funnel-label">Hired</div>
+            <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:7%;background:#0a7a4d">2</div></div>
+            <div class="funnel-count">2</div>
+          </div>
+        </div>
+        <div>
+          <div class="an-card" style="margin-bottom:10px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:.75rem">Applications by Posting</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>Frontend Developer</span><span style="font-weight:600">14</span></div><div style="background:#f0f4fd;border-radius:4px;height:6px"><div style="width:58%;background:var(--p);height:6px;border-radius:4px"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>Data Science</span><span style="font-weight:600">7</span></div><div style="background:#f0f4fd;border-radius:4px;height:6px"><div style="width:29%;background:#8b5cf6;height:6px;border-radius:4px"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>UI/UX Design</span><span style="font-weight:600">3</span></div><div style="background:#f0f4fd;border-radius:4px;height:6px"><div style="width:13%;background:#f59e0b;height:6px;border-radius:4px"></div></div></div>
+            </div>
+          </div>
+          <div class="an-card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:.75rem">Top Candidate Skills</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <span style="background:#eff6ff;color:var(--p);font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px">React (11)</span>
+              <span style="background:#f3f0ff;color:#6C3BFF;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px">Python (9)</span>
+              <span style="background:#f0fdf9;color:#0a7a4d;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px">JavaScript (8)</span>
+              <span style="background:#fff8f0;color:#c06000;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px">Figma (4)</span>
+              <span style="background:#edfaf4;color:#0a7a4d;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px">Node.js (6)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPANY PROFILE -->
+    <div class="view" id="view-profile">
+      <div class="page-hd"><h1>Company Profile</h1><p>Your public profile seen by candidates</p></div>
+      <div class="co-profile">
+        <div>
+          <div class="co-card">
+            <div class="co-logo-big">TN</div>
+            <div class="co-name" id="company-name">TechNova Solutions</div>
+            <div class="co-type">Product-based Startup · Technology</div>
+            <div class="co-stats">
+              <div><div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--p)">3</div><div style="font-size:11px;color:var(--txm)">Active Jobs</div></div>
+              <div><div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--p)">24</div><div style="font-size:11px;color:var(--txm)">Applicants</div></div>
+              <div><div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--p)">8</div><div style="font-size:11px;color:var(--txm)">Hired Total</div></div>
+            </div>
+            <button class="edit-btn" onclick="openProfileEdit() ">✏️ Edit Company Profile</button>
+          </div>
+        </div>
+        <div>
+          <div class="info-card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:.75rem">Company Details</div>
+            <div class="info-row"><span class="info-lbl">Company Name</span><span class="info-val">TechNova Solutions</span></div>
+            <div class="info-row"><span class="info-lbl">Industry</span><span class="info-val">Technology / SaaS</span></div>
+            <div class="info-row"><span class="info-lbl">Company Size</span><span class="info-val">51–200 employees</span></div>
+            <div class="info-row"><span class="info-lbl">Founded</span><span class="info-val">2018</span></div>
+            <div class="info-row"><span class="info-lbl">Location</span><span class="info-val">Bangalore, India</span></div>
+            <div class="info-row"><span class="info-lbl">Website</span><span class="info-val" style="color:var(--p)">www.technova.in</span></div>
+            <div class="info-row"><span class="info-lbl">Contact Email</span><span class="info-val">hr@technova.in</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CANDIDATE DETAIL MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  const POSTINGS = [
+    {id:1,title:'Frontend Developer Intern',cat:'Tech',loc:'Remote',type:'Full-time',stip:'₹15,000/mo',dur:'3 months',apps:14,views:180,status:'active',deadline:'Apr 20, 2026'},
+    {id:2,title:'Data Science Intern',cat:'Tech',loc:'Hyderabad',type:'Full-time',stip:'₹20,000/mo',dur:'6 months',apps:7,views:98,status:'active',deadline:'Apr 18, 2026'},
+    {id:3,title:'UI/UX Design Intern',cat:'Design',loc:'Bangalore',type:'Part-time',stip:'₹10,000/mo',dur:'2 months',apps:3,views:64,status:'active',deadline:'Apr 25, 2026'},
+    {id:4,title:'Backend Developer Intern',cat:'Tech',loc:'Remote',type:'Full-time',stip:'₹16,000/mo',dur:'3 months',apps:0,views:12,status:'draft',deadline:'May 1, 2026'},
+    {id:5,title:'Marketing Intern',cat:'Marketing',loc:'Mumbai',type:'Full-time',stip:'₹8,000/mo',dur:'2 months',apps:18,views:220,status:'closed',deadline:'Mar 15, 2026'},
+  ];
+
+  const CANDIDATES = [
+    {id:1,name:'Rahul Sharma',initials:'RS',role:'Frontend Developer Intern',date:'Apr 1, 2026',skills:['React','JavaScript'],status:'interview',cgpa:'8.4',college:'Delhi Univ'},
+    {id:2,name:'Priya Verma',initials:'PV',role:'Frontend Developer Intern',date:'Apr 2, 2026',skills:['React','CSS'],status:'review',cgpa:'8.1',college:'BITS Pilani'},
+    {id:3,name:'Aman Kumar',initials:'AK',role:'Data Science Intern',date:'Apr 3, 2026',skills:['Python','ML'],status:'new',cgpa:'9.0',college:'IIT Bombay'},
+    {id:4,name:'Sneha Joshi',initials:'SJ',role:'UI/UX Design Intern',date:'Apr 4, 2026',skills:['Figma','XD'],status:'new',cgpa:'7.8',college:'NIT Trichy'},
+    {id:5,name:'Vikram Singh',initials:'VS',role:'Data Science Intern',date:'Apr 5, 2026',skills:['Python','SQL'],status:'review',cgpa:'8.6',college:'DTU Delhi'},
+    {id:6,name:'Ananya Das',initials:'AD',role:'Frontend Developer Intern',date:'Apr 6, 2026',skills:['JavaScript','Node.js'],status:'interview',cgpa:'8.9',college:'NSIT Delhi'},
+    {id:7,name:'Rohit Gupta',initials:'RG',role:'Frontend Developer Intern',date:'Mar 20, 2026',skills:['React','TypeScript'],status:'accepted',cgpa:'8.7',college:'Jadavpur Univ'},
+    {id:8,name:'Kavya Nair',initials:'KN',role:'Data Science Intern',date:'Mar 22, 2026',skills:['Python','TensorFlow'],status:'rejected',cgpa:'7.2',college:'Anna Univ'},
+  ];
+
+  const SL = {new:'New',review:'Under Review',interview:'Interview',accepted:'Accepted',rejected:'Rejected'};
+  const SC = {new:'sp-new',review:'sp-review',interview:'sp-interview',accepted:'sp-accepted',rejected:'sp-rejected'};
+
+  let postFilter = 'all';
+
+  function makePostCard(p, compact=false){
+    const statusCls = {active:'ps-active',closed:'ps-closed',draft:'ps-draft'}[p.status];
+    return `<div class="p-card">
+      <div class="p-card-head">
+        <div><div class="p-title">${p.title}</div><div class="p-sub">${p.cat} · ${p.loc} · ${p.type}</div></div>
+        <span class="p-status ${statusCls}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span>
+      </div>
+      <div class="p-stats-row">
+        <div class="p-stat"><div class="n">${p.apps}</div><div class="l">Applications</div></div>
+        <div class="p-stat"><div class="n">${p.views}</div><div class="l">Views</div></div>
+        <div class="p-stat"><div class="n">${p.stip}</div><div class="l">Stipend</div></div>
+        <div class="p-stat"><div class="n">${p.dur}</div><div class="l">Duration</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--txm);margin-bottom:8px">Deadline: ${p.deadline}</div>
+      <div class="p-card-foot">
+        <button class="p-btn view" onclick="sv('candidates',null)">👥 View Applicants</button>
+        ${p.status!=='closed'?`<button class="p-btn edit">✏️ Edit</button>`:''}
+        ${p.status==='active'?`<button class="p-btn close-btn">Close</button>`:''}
+      </div>
+    </div>`;
+  }
+   function loadCompanyName() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (user) {
+    // fname + lname OR company name
+    const name = user.fname + " " + user.lname;
+
+    document.getElementById("welcome-text").innerHTML =
+      `Welcome back, ${name}! 👋`;
+
+    // optional company profile me bhi
+    const company = document.getElementById("company-name");
+    if (company) company.textContent = name;
+  }
+}
+  function makeCandRow(c, showActions=true){
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openCandModal(${c.id})">
+        <div class="c-avatar">${c.initials}</div>
+        <div><div style="font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--txm)">${c.college}</div></div>
+      </div></td>
+      <td style="font-size:12px">${c.role}</td>
+      <td style="font-size:12px;color:var(--txm)">${c.date}</td>
+      ${showActions?`<td><div style="display:flex;gap:4px;flex-wrap:wrap">${c.skills.map(s=>`<span style="background:#eff6ff;color:var(--p);font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500">${s}</span>`).join('')}</div></td>`:''}
+      <td><span class="status-pill ${SC[c.status]}">${SL[c.status]}</span></td>
+      <td>
+        <div class="action-btns">
+          ${c.status!=='accepted'&&c.status!=='rejected'?`<button class="act-btn interview" onclick="updateStatus(${c.id},'interview')">Interview</button>`:''}
+          ${c.status!=='accepted'?`<button class="act-btn accept" onclick="updateStatus(${c.id},'accepted')">Accept</button>`:''}
+          ${c.status!=='rejected'?`<button class="act-btn reject" onclick="updateStatus(${c.id},'rejected')">Reject</button>`:''}
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  function renderDashboard(){
+    // recent 5
+    document.getElementById('recent-tbody').innerHTML = CANDIDATES.slice(0,5).map(c=>makeCandRow(c,false)).join('');
+    document.getElementById('active-post-grid').innerHTML = POSTINGS.filter(p=>p.status==='active').map(p=>makePostCard(p)).join('');
+  }
+
+  function renderPostings(){
+    const list = postFilter==='all'?POSTINGS:POSTINGS.filter(p=>p.status===postFilter);
+    document.getElementById('all-post-grid').innerHTML = list.map(p=>makePostCard(p)).join('');
+  }
+
+  function filterPost(el, val){
+    document.querySelectorAll('#view-postings .nav-tab').forEach(t=>t.classList.remove('on'));
+    el.classList.add('on');
+    postFilter = val;
+    renderPostings();
+  }
+
+  function renderCandidates(){
+    const q = document.getElementById('cand-q').value.toLowerCase();
+    const job = document.getElementById('cand-job').value;
+    const status = document.getElementById('cand-status').value;
+    const list = CANDIDATES.filter(c=>{
+      const mq = !q || c.name.toLowerCase().includes(q);
+      const mj = !job || POSTINGS.find(p=>p.id===parseInt(job))?.title===c.role;
+      const ms = !status || c.status===status;
+      return mq&&mj&&ms;
+    });
+    document.getElementById('cand-tbody').innerHTML = list.map(c=>makeCandRow(c,true)).join('');
+  }
+
+  function updateStatus(candId, status){
+    const c = CANDIDATES.find(x=>x.id===candId);
+    if(c) c.status = status;
+    renderDashboard(); renderCandidates();
+    closeModal();
+  }
+
+  function openCandModal(id){
+    const c = CANDIDATES.find(x=>x.id===id);
+    document.getElementById('modal-body').innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem">
+        <div class="c-avatar" style="width:52px;height:52px;font-size:18px">${c.initials}</div>
+        <div>
+          <div style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700">${c.name}</div>
+          <div style="font-size:13px;color:var(--txm)">${c.college} · CGPA: ${c.cgpa}</div>
+        </div>
+      </div>
+      <div style="background:#f8f9fc;border-radius:10px;padding:10px 14px;margin-bottom:1rem">
+        <div style="font-size:12px;color:var(--txm);margin-bottom:2px">Applied for</div>
+        <div style="font-size:14px;font-weight:600">${c.role}</div>
+        <div style="font-size:12px;color:var(--txm);margin-top:2px">Applied on ${c.date}</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px">Skills</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${c.skills.map(s=>`<span style="background:#eff6ff;color:var(--p);font-size:12px;padding:4px 10px;border-radius:6px;font-weight:500">${s}</span>`).join('')}</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+        <span style="font-size:13px">Current Status:</span>
+        <span class="status-pill ${SC[c.status]}">${SL[c.status]}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        ${c.status!=='accepted'&&c.status!=='rejected'?`<button class="sub-btn" style="flex:1;padding:10px;font-size:13px;margin-top:0" onclick="updateStatus(${c.id},'interview')">Schedule Interview</button>`:''}
+        ${c.status!=='accepted'?`<button style="flex:1;background:#edfaf4;color:#0a7a4d;border:none;border-radius:11px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="updateStatus(${c.id},'accepted')">Accept ✓</button>`:''}
+        ${c.status!=='rejected'?`<button style="flex:1;background:#fff5f5;color:#e53e3e;border:none;border-radius:11px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="updateStatus(${c.id},'rejected')">Reject ✗</button>`:''}
+      </div>`;
+    document.getElementById('modal-bg').classList.add('open');
+  }
+
+  function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+  document.getElementById('modal-bg').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+  function handlePost(){
+
+  const title = document.querySelectorAll(".fi")[0].value;
+  const category = document.querySelectorAll(".fi")[1].value;
+  const location = document.querySelectorAll(".fi")[2].value;
+  const type = document.querySelectorAll(".fi")[3].value;
+  const stipend = document.querySelectorAll(".fi")[4].value;
+  const duration = document.querySelectorAll(".fi")[5].value;
+  const openings = document.querySelectorAll(".fi")[6].value;
+  const deadline = document.querySelectorAll(".fi")[7].value;
+
+  const newPost = {
+    id: Date.now(),
+    title: title,
+    cat: category,
+    loc: location,
+    type: type,
+    stip: stipend,
+    dur: duration,
+    apps: 0,
+    views: 0,
+    status: "active",
+    deadline: deadline
+  };
+
+  POSTINGS.unshift(newPost);
+
+  document.getElementById('post-success').style.display='block';
+
+  renderPostings();
+  renderDashboard();
+
+  setTimeout(()=>{
+    sv('postings', null);
+  },800);
+}
+  function sv(name, tabEl){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    document.getElementById('view-'+name).classList.add('on');
+    if(tabEl){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));tabEl.classList.add('on');}
+    document.querySelectorAll('.s-item').forEach(s=>s.classList.remove('on'));
+    if(name==='candidates') renderCandidates();
+    if(name==='postings') renderPostings();
+    if(name==='home') renderDashboard();
+  }
+  function openProfileEdit(){
+  const profile = JSON.parse(localStorage.getItem("companyProfile")) || {};
+
+  document.getElementById("edit-name").value = profile.name || "";
+  document.getElementById("edit-industry").value = profile.industry || "";
+  document.getElementById("edit-size").value = profile.size || "";
+  document.getElementById("edit-location").value = profile.location || "";
+  document.getElementById("edit-website").value = profile.website || "";
+  document.getElementById("edit-email").value = profile.email || "";
+
+  document.getElementById("profile-modal").classList.add("open");
+}
+
+function closeProfileEdit(){
+  document.getElementById("profile-modal").classList.remove("open");
+}
+function loadProfile(){
+  const profile = JSON.parse(localStorage.getItem("companyProfile"));
+
+  if(profile){
+    document.getElementById("company-name").textContent = profile.name || "Company";
+
+    const rows = document.querySelectorAll(".info-val");
+
+    rows[0].textContent = profile.name || "-";
+    rows[1].textContent = profile.industry || "-";
+    rows[2].textContent = profile.size || "-";
+    rows[4].textContent = profile.location || "-";
+    rows[5].textContent = profile.website || "-";
+    rows[6].textContent = profile.email || "-";
+  }
+}
+
+function saveProfile(){
+  const profile = {
+    name: document.getElementById("edit-name").value,
+    industry: document.getElementById("edit-industry").value,
+    size: document.getElementById("edit-size").value,
+    location: document.getElementById("edit-location").value,
+    website: document.getElementById("edit-website").value,
+    email: document.getElementById("edit-email").value
+  };
+
+  localStorage.setItem("companyProfile", JSON.stringify(profile));
+  loadProfile();
+  closeProfileEdit();
+}
+loadCompanyName();
+loadProfile();
+renderDashboard();
+renderPostings();
+renderCandidates();
+
+ 
+</script>
+<div class="modal-bg" id="profile-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProfileEdit()">×</button>
+    <h3 style="margin-bottom:1rem">Edit Company Profile</h3>
+
+    <div class="form-group">
+      <label class="fl">Company Name</label>
+      <input class="fi" id="edit-name">
+    </div>
+
+    <div class="form-group">
+      <label class="fl">Industry</label>
+      <input class="fi" id="edit-industry">
+    </div>
+
+    <div class="form-group">
+      <label class="fl">Company Size</label>
+      <input class="fi" id="edit-size">
+    </div>
+
+    <div class="form-group">
+      <label class="fl">Location</label>
+      <input class="fi" id="edit-location">
+    </div>
+
+    <div class="form-group">
+      <label class="fl">Website</label>
+      <input class="fi" id="edit-website">
+    </div>
+
+    <div class="form-group">
+      <label class="fl">Email</label>
+      <input class="fi" id="edit-email">
+    </div>
+
+    <button class="sub-btn" onclick="saveProfile()">Save Changes</button>
+  </div>
+</div>
+</body>
+</html>

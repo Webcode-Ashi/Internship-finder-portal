@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTIntern – Student Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--p:#6C3BFF;--p2:#8B5CF6;--pk:#F3F0FF;--tx:#1a1523;--txm:#6b5f7a;--bg:#faf9fc;--wh:#fff;--br:12px;--brl:18px;--suc:#0a7a4d;--suck:#edfaf4;--warn:#c06000;--warnk:#fff8f0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
+
+    /* NAV */
+    nav{background:var(--wh);border-bottom:0.5px solid #e5e0f0;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:1rem}
+    .logo{font-family:'Sora',sans-serif;font-weight:700;font-size:20px;color:var(--p);letter-spacing:-0.5px;text-decoration:none;flex-shrink:0}
+    .logo span{color:var(--tx)}
+    .nav-center{display:flex;gap:4px;background:#f5f3fa;padding:4px;border-radius:30px}
+    .nav-tab{padding:6px 16px;border-radius:25px;font-size:13px;font-weight:500;cursor:pointer;color:var(--txm);transition:all .2s;border:none;background:transparent;font-family:'DM Sans',sans-serif;white-space:nowrap}
+    .nav-tab.on{background:#fff;color:var(--p);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .notif-btn{background:none;border:none;cursor:pointer;font-size:18px;position:relative;padding:4px}
+    .notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:#e53e3e;border-radius:50%;border:1.5px solid #fff}
+    .avatar{width:34px;height:34px;border-radius:50%;background:var(--p);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+
+    /* LAYOUT */
+    .dash-layout{display:flex;flex:1;min-height:0}
+    .sidebar{width:220px;background:var(--wh);border-right:0.5px solid #e5e0f0;padding:1.25rem 0.75rem;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+    .sidebar-label{font-size:10px;font-weight:600;color:#b0a5c0;letter-spacing:1px;text-transform:uppercase;padding:0 10px;margin:12px 0 4px}
+    .s-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13px;font-weight:500;color:var(--txm);cursor:pointer;transition:all .18s;border:none;background:transparent;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+    .s-item:hover{background:#f3f0ff;color:var(--p)}
+    .s-item.on{background:#f3f0ff;color:var(--p)}
+    .s-item .ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+    .s-badge{margin-left:auto;background:#e53e3e;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+    .s-badge.g{background:#0a7a4d}
+
+    /* MAIN */
+    .main{flex:1;overflow-y:auto;padding:1.5rem;min-width:0}
+
+    /* SECTION VIEWS */
+    .view{display:none}
+    .view.on{display:block}
+
+    /* PAGE HEADER */
+    .page-hd{margin-bottom:1.5rem}
+    .page-hd h1{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+    .page-hd p{font-size:14px;color:var(--txm)}
+
+    /* STATS ROW */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
+    .stat-card{background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:10px}
+    .stat-ico{font-size:20px;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .stat-ico.p{background:#f3f0ff}
+    .stat-ico.g{background:#edfaf4}
+    .stat-ico.o{background:#fff8f0}
+    .stat-ico.b{background:#e8f4ff}
+    .stat-num{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:var(--tx);line-height:1}
+    .stat-lbl{font-size:12px;color:var(--txm);margin-top:2px}
+
+    /* SECTION HEAD */
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+    .sec-head h2{font-family:'Sora',sans-serif;font-size:16px;font-weight:600}
+    .see-all{font-size:12px;color:var(--p);cursor:pointer;font-weight:500;border:none;background:none;font-family:'DM Sans',sans-serif}
+
+    /* INTERNSHIP GRID */
+    .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:1.5rem}
+    .i-card{background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1.1rem;cursor:pointer;transition:all .2s;position:relative}
+    .i-card:hover{border-color:#c4b5ff;box-shadow:0 4px 14px rgba(108,59,255,.07);transform:translateY(-1px)}
+    .i-card.feat{background:linear-gradient(135deg,#6C3BFF,#8B5CF6);border-color:transparent}
+    .i-card.feat:hover{box-shadow:0 6px 20px rgba(108,59,255,.3)}
+    .i-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+    .co-logo{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+    .i-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:2px;line-height:1.3}
+    .i-card.feat .i-title{color:#fff}
+    .i-co{font-size:12px;color:var(--txm)}
+    .i-card.feat .i-co{color:#d4c9ff}
+    .badge-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+    .badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+    .bt{background:#f3f0ff;color:#6C3BFF}
+    .bl{background:#edfaf4;color:#0a7a4d}
+    .bs{background:#fff8f0;color:#c06000}
+    .i-card.feat .bt,.i-card.feat .bl,.i-card.feat .bs{background:rgba(255,255,255,.18);color:#fff}
+    .i-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+    .tag{background:#f5f3fa;color:#7c6b9a;font-size:11px;padding:3px 8px;border-radius:6px}
+    .i-card.feat .tag{background:rgba(255,255,255,.15);color:#f0ecff}
+    .i-foot{display:flex;align-items:center;justify-content:space-between;border-top:0.5px solid #f0ecf9;padding-top:9px}
+    .i-card.feat .i-foot{border-color:rgba(255,255,255,.2)}
+    .deadline{font-size:11px;color:var(--txm)}
+    .i-card.feat .deadline{color:#d4c9ff}
+    .apply-btn{background:var(--p);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;transition:background .2s;font-family:'DM Sans',sans-serif}
+    .apply-btn:hover{background:var(--p2)}
+    .i-card.feat .apply-btn{background:#fff;color:var(--p)}
+    .save-btn{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:14px;color:#c4b5d0}
+    .save-btn.on{color:var(--p)}
+    .i-card.feat .save-btn{color:rgba(255,255,255,.5)}
+    .i-card.feat .save-btn.on{color:#fff}
+    .applied-mark{color:#0a7a4d;font-size:11px;font-weight:600}
+
+    /* APPLICATION TABLE */
+    .app-table{background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);overflow:hidden;margin-bottom:1.5rem}
+    .app-table table{width:100%;border-collapse:collapse}
+    .app-table th{font-size:11px;font-weight:600;color:var(--txm);text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;background:#faf9fc;border-bottom:0.5px solid #e5e0f0;text-align:left}
+    .app-table td{font-size:13px;padding:11px 14px;border-bottom:0.5px solid #f5f3fa;color:var(--tx)}
+    .app-table tr:last-child td{border-bottom:none}
+    .app-table tr:hover td{background:#faf9fc}
+    .status-pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+    .sp-pending{background:#fff8f0;color:#c06000}
+    .sp-review{background:#e8f4ff;color:#185fa5}
+    .sp-interview{background:#f3f0ff;color:#6C3BFF}
+    .sp-accepted{background:#edfaf4;color:#0a7a4d}
+    .sp-rejected{background:#fff5f5;color:#e53e3e}
+
+    /* PROFILE */
+    .profile-wrap{display:grid;grid-template-columns:300px 1fr;gap:1rem}
+    .profile-card{background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1.5rem;text-align:center}
+    .p-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;font-family:'Sora',sans-serif}
+    .p-name{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;margin-bottom:2px}
+    .p-role{font-size:13px;color:var(--txm);margin-bottom:12px}
+    .p-stats{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.25rem;padding:1rem 0;border-top:0.5px solid #f0ecf9;border-bottom:0.5px solid #f0ecf9}
+    .p-stat .num{font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:var(--p)}
+    .p-stat .lbl{font-size:11px;color:var(--txm)}
+    .p-skills{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+    .skill-tag{background:var(--pk);color:var(--p);font-size:11px;font-weight:500;padding:3px 10px;border-radius:6px}
+    .edit-btn{width:100%;margin-top:1rem;background:var(--pk);color:var(--p);border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .edit-btn:hover{background:#e9e1ff}
+    .info-card{background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1.25rem}
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid #f5f3fa}
+    .info-row:last-child{border-bottom:none}
+    .info-lbl{font-size:12px;color:var(--txm);font-weight:500}
+    .info-val{font-size:13px;font-weight:500;color:var(--tx)}
+
+    /* PROGRESS BAR */
+    .prog-wrap{margin-bottom:1.25rem;background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1.25rem}
+    .prog-head{display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;font-weight:500}
+    .prog-bar-bg{background:#f0ecf9;border-radius:6px;height:8px}
+    .prog-bar-fill{background:linear-gradient(90deg,var(--p),var(--p2));border-radius:6px;height:8px;transition:width .5s}
+    .prog-items{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem}
+    .prog-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txm)}
+    .prog-item .ck{width:16px;height:16px;border-radius:50%;border:1.5px solid #e0d8f5;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px}
+    .prog-item .ck.done{background:var(--p);border-color:var(--p);color:#fff}
+
+    /* NOTIFICATIONS */
+    .notif-list{display:flex;flex-direction:column;gap:8px}
+    .notif-item{background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1rem 1.25rem;display:flex;gap:12px;align-items:flex-start}
+    .notif-item.unread{background:#f9f8ff;border-color:#ddd6ff}
+    .notif-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .notif-txt .title{font-size:13px;font-weight:600;margin-bottom:2px}
+    .notif-txt .sub{font-size:12px;color:var(--txm)}
+    .notif-time{font-size:11px;color:var(--txm);margin-left:auto;white-space:nowrap;flex-shrink:0}
+
+    /* SEARCH + FILTER */
+    .search-filter-row{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+    .search-box{flex:1;min-width:200px;display:flex;align-items:center;background:var(--wh);border:1.5px solid #e5e0f0;border-radius:10px;padding:0 12px;gap:8px}
+    .search-box input{flex:1;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--tx);background:transparent;padding:9px 0}
+    .search-box:focus-within{border-color:var(--p)}
+    .filter-chip{background:var(--wh);border:1px solid #e0d8f5;color:var(--txm);padding:6px 13px;border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500;border-width:1px;font-family:'DM Sans',sans-serif}
+    .filter-chip:hover,.filter-chip.on{background:var(--p);color:#fff;border-color:var(--p)}
+
+    /* EMPTY STATE */
+    .empty{text-align:center;padding:2.5rem 1rem;color:var(--txm)}
+    .empty div{font-size:36px;margin-bottom:.5rem}
+    .empty p{font-size:13px}
+
+    /* MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:center;justify-content:center}
+    .modal-bg.open{display:flex}
+    .modal{background:#fff;border-radius:20px;padding:1.75rem;max-width:500px;width:92%;max-height:82vh;overflow-y:auto;position:relative}
+    .modal-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--txm)}
+    .modal h2{font-family:'Sora',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px}
+    .modal .m-co{font-size:13px;color:var(--txm);margin-bottom:1rem}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:1rem 0}
+    .info-item{background:#f9f7ff;border-radius:9px;padding:9px 12px}
+    .info-item .lbl{font-size:11px;color:var(--txm);margin-bottom:2px;font-weight:500}
+    .info-item .val{font-size:13px;font-weight:600;color:var(--tx)}
+    .m-desc{font-size:13px;color:var(--txm);line-height:1.7;margin-bottom:1rem}
+    .m-skills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1.25rem}
+    .apply-big{width:100%;background:var(--p);color:#fff;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .apply-big:hover{background:var(--p2)}
+
+    @media(max-width:768px){
+      .sidebar{display:none}
+      .profile-wrap{grid-template-columns:1fr}
+      .nav-center{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="./internship_portal.html">CT<span>Intern</span></a>
+  <div class="nav-center">
+    <button class="nav-tab on" onclick="switchView('home',this)">🏠 Home</button>
+    <button class="nav-tab" onclick="switchView('browse',this)">🔍 Browse</button>
+    <button class="nav-tab" onclick="switchView('applications',this)">📋 Applications</button>
+    <button class="nav-tab" onclick="switchView('saved',this)">🔖 Saved</button>
+    <button class="nav-tab" onclick="switchView('profile',this)">👤 Profile</button>
+  </div>
+  <div class="nav-right">
+    <button class="notif-btn" onclick="switchView('notifications',document.querySelector('.nav-tab'))">🔔<span class="notif-dot"></span></button>
+    <div class="avatar" id="nav-avatar">RS</div>
+  </div>
+</nav>
+
+<div class="dash-layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-label">Menu</div>
+    <button class="s-item on" onclick="switchView('home',null,'home')">
+      <span class="ico">🏠</span> Home
+    </button>
+    <button class="s-item" onclick="switchView('browse',null,'browse')">
+      <span class="ico">🔍</span> Browse Internships
+    </button>
+    <button class="s-item" onclick="switchView('applications',null,'applications')">
+      <span class="ico">📋</span> My Applications
+      <span class="s-badge">3</span>
+    </button>
+    <button class="s-item" onclick="switchView('saved',null,'saved')">
+      <span class="ico">🔖</span> Saved
+      <span class="s-badge g">2</span>
+    </button>
+    <div class="sidebar-label">Account</div>
+    <button class="s-item" onclick="switchView('profile',null,'profile')">
+      <span class="ico">👤</span> My Profile
+    </button>
+    <button class="s-item" onclick="switchView('notifications',null,'notifications')">
+      <span class="ico">🔔</span> Notifications
+      <span class="s-badge">2</span>
+    </button>
+    <div style="flex:1"></div>
+    <button class="s-item" id="logout-btn">
+      <span class="ico">🚪</span> Logout
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- ===== HOME ===== -->
+    <div class="view on" id="view-home">
+      <!-- Welcome banner -->
+      <div style="background:linear-gradient(135deg,#6C3BFF,#8B5CF6);border-radius:18px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:1rem">
+        <div>
+          <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px" id="welcome-text">
+Welcome back, User! 👋
+</div>
+          <div style="font-size:13px;opacity:.85">You have <strong>2 new notifications</strong> and <strong>1 interview</strong> scheduled this week.</div>
+        </div>
+        <div style="font-size:48px;flex-shrink:0">🚀</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-ico p">📋</div>
+          <div><div class="stat-num">3</div><div class="stat-lbl">Applications</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico g">✅</div>
+          <div><div class="stat-num">1</div><div class="stat-lbl">Interviews</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico o">🔖</div>
+          <div><div class="stat-num">2</div><div class="stat-lbl">Saved</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico b">👁️</div>
+          <div><div class="stat-num">18</div><div class="stat-lbl">Profile Views</div></div>
+        </div>
+      </div>
+
+      <!-- Profile completion -->
+      <div class="prog-wrap">
+        <div class="prog-head"><span>Profile Completion</span><span style="color:var(--p);font-weight:600">70%</span></div>
+        <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:70%"></div></div>
+        <div class="prog-items">
+          <div class="prog-item"><div class="ck done">✓</div>Basic Info Added</div>
+          <div class="prog-item"><div class="ck done">✓</div>Resume Uploaded</div>
+          <div class="prog-item"><div class="ck done">✓</div>Skills Listed</div>
+          <div class="prog-item"><div class="ck"></div>Add Work Experience</div>
+          <div class="prog-item"><div class="ck"></div>Add Projects</div>
+          <div class="prog-item"><div class="ck"></div>Link LinkedIn</div>
+        </div>
+      </div>
+
+      <!-- Featured Internships -->
+      <div class="sec-head">
+        <h2>🔥 Recommended For You</h2>
+        <button class="see-all" onclick="switchView('browse',null,'browse')">See all →</button>
+      </div>
+      <div class="int-grid" id="home-grid"></div>
+    </div>
+
+    <!-- ===== BROWSE ===== -->
+    <div class="view" id="view-browse">
+      <div class="page-hd">
+        <h1>Browse Internships</h1>
+        <p>1,240+ active internships across India & remote</p>
+      </div>
+      <div class="search-filter-row">
+        <div class="search-box">
+          <span style="font-size:14px">🔍</span>
+          <input type="text" id="browse-q" placeholder="Search role, skill, company..." oninput="renderBrowse()">
+        </div>
+        <select id="browse-loc" onchange="renderBrowse()" style="border:1.5px solid #e5e0f0;border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;outline:none;color:var(--tx);cursor:pointer">
+          <option value="">All Locations</option>
+          <option>Remote</option>
+          <option>Delhi</option>
+          <option>Bangalore</option>
+          <option>Mumbai</option>
+          <option>Hyderabad</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem">
+        <button class="filter-chip on" onclick="setBrowseCat(this,'')">All</button>
+        <button class="filter-chip" onclick="setBrowseCat(this,'Tech')">💻 Tech</button>
+        <button class="filter-chip" onclick="setBrowseCat(this,'Design')">🎨 Design</button>
+        <button class="filter-chip" onclick="setBrowseCat(this,'Marketing')">📈 Marketing</button>
+        <button class="filter-chip" onclick="setBrowseCat(this,'Finance')">💰 Finance</button>
+      </div>
+      <div class="int-grid" id="browse-grid"></div>
+      <div class="empty" id="browse-empty" style="display:none"><div>🔍</div><p>No internships found. Try different filters.</p></div>
+    </div>
+
+    <!-- ===== APPLICATIONS ===== -->
+    <div class="view" id="view-applications">
+      <div class="page-hd">
+        <h1>My Applications</h1>
+        <p>Track the status of all your internship applications</p>
+      </div>
+      <div class="app-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Internship</th>
+              <th>Company</th>
+              <th>Applied On</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="app-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== SAVED ===== -->
+    <div class="view" id="view-saved">
+      <div class="page-hd">
+        <h1>Saved Internships</h1>
+        <p>Internships you've bookmarked</p>
+      </div>
+      <div class="int-grid" id="saved-grid"></div>
+      <div class="empty" id="saved-empty" style="display:none"><div>🔖</div><p>No saved internships yet. Bookmark any card!</p></div>
+    </div>
+
+    <!-- ===== PROFILE ===== -->
+    <div class="view" id="view-profile">
+      <div class="page-hd">
+        <h1>My Profile</h1>
+        <p>Manage your info and make your profile shine</p>
+      </div>
+      <div class="profile-wrap">
+        <div>
+          <div class="profile-card">
+            <div class="p-avatar">RS</div>
+            <div class="p-name" id="profile-name">User Name</div>
+            <div class="p-role">B.Tech CSE · Delhi University</div>
+            <div class="p-stats">
+              <div class="p-stat"><div class="num">3</div><div class="lbl">Applied</div></div>
+              <div class="p-stat"><div class="num">2</div><div class="lbl">Saved</div></div>
+              <div class="p-stat"><div class="num">18</div><div class="lbl">Views</div></div>
+            </div>
+            <div class="p-skills">
+              <span class="skill-tag">React</span>
+              <span class="skill-tag">JavaScript</span>
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">Node.js</span>
+              <span class="skill-tag">Figma</span>
+            </div>
+            <button class="edit-btn">✏️ Edit Profile</button>
+          </div>
+          <div style="background:var(--wh);border:0.5px solid #e5e0f0;border-radius:var(--brl);padding:1.1rem;margin-top:10px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px">Resume</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:#f9f7ff;border-radius:9px;border:1px dashed #c4b5ff">
+              <span style="font-size:18px">📄</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Rahul_Sharma_Resume.pdf</div>
+                <div style="font-size:11px;color:var(--txm)">Uploaded Apr 1, 2026</div>
+              </div>
+              <button style="background:var(--p);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Update</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="info-card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:.75rem">Personal Information</div>
+            <div class="info-row"><span class="info-lbl">Full Name</span><span class="info-val" id="profile-name">User Name</span></div>
+            <div class="info-row"><span class="info-lbl">Email</span><span class="info-val" id="profile-email">email</span></div>
+            <div class="info-row"><span class="info-lbl">Phone</span><span class="info-val">+91 98765 43210</span></div>
+            <div class="info-row"><span class="info-lbl">College</span><span class="info-val">Delhi University</span></div>
+            <div class="info-row"><span class="info-lbl">Degree</span><span class="info-val">B.Tech CSE</span></div>
+            <div class="info-row"><span class="info-lbl">Graduation Year</span><span class="info-val">2026</span></div>
+            <div class="info-row"><span class="info-lbl">CGPA</span><span class="info-val">8.4 / 10</span></div>
+          </div>
+          <div class="info-card" style="margin-top:10px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:.75rem">Preferences</div>
+            <div class="info-row"><span class="info-lbl">Preferred Roles</span><span class="info-val">Frontend, Full-stack</span></div>
+            <div class="info-row"><span class="info-lbl">Location Preference</span><span class="info-val">Remote / Delhi</span></div>
+            <div class="info-row"><span class="info-lbl">Min Stipend</span><span class="info-val">₹10,000/mo</span></div>
+            <div class="info-row"><span class="info-lbl">Duration</span><span class="info-val">2–6 months</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NOTIFICATIONS ===== -->
+    <div class="view" id="view-notifications">
+      <div class="page-hd">
+        <h1>Notifications</h1>
+        <p>Stay updated on your applications and new opportunities</p>
+      </div>
+      <div class="notif-list">
+        <div class="notif-item unread">
+          <div class="notif-ico" style="background:#f3f0ff">🎉</div>
+          <div class="notif-txt">
+            <div class="title">Interview Scheduled!</div>
+            <div class="sub">TechNova Solutions has invited you for a virtual interview for <strong>Frontend Developer Intern</strong>.</div>
+          </div>
+          <div class="notif-time">2h ago</div>
+        </div>
+        <div class="notif-item unread">
+          <div class="notif-ico" style="background:#edfaf4">📋</div>
+          <div class="notif-txt">
+            <div class="title">Application Under Review</div>
+            <div class="sub">Analytiq AI is reviewing your application for <strong>Data Science Intern</strong>.</div>
+          </div>
+          <div class="notif-time">1d ago</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-ico" style="background:#fff8f0">🔥</div>
+          <div class="notif-txt">
+            <div class="title">New Internships Matching Your Profile</div>
+            <div class="sub">5 new Tech internships have been posted that match your skills.</div>
+          </div>
+          <div class="notif-time">2d ago</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-ico" style="background:#e8f4ff">💡</div>
+          <div class="notif-txt">
+            <div class="title">Complete Your Profile</div>
+            <div class="sub">Add your work experience and projects to get 3x more profile views.</div>
+          </div>
+          <div class="notif-time">4d ago</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  const INTERNSHIPS = [
+    {id:1,title:'Frontend Developer Intern',company:'TechNova Solutions',logo:'💻',bg:'#f3f0ff',type:'Full-time',loc:'Remote',stip:'₹15,000/mo',dur:'3 months',cat:'Tech',tags:['React','JavaScript','CSS'],deadline:'Apr 20, 2026',desc:'Work with our frontend team to build responsive web applications. Contribute to real production code from day one, collaborating with senior engineers on exciting product features.',feat:true},
+    {id:2,title:'UI/UX Design Intern',company:'Creative Studio',logo:'🎨',bg:'#fff0f8',type:'Part-time',loc:'Bangalore',stip:'₹10,000/mo',dur:'2 months',cat:'Design',tags:['Figma','Wireframing','Prototyping'],deadline:'Apr 25, 2026',desc:'Join our design team to create beautiful and intuitive user experiences. You will work on real client projects under the guidance of senior designers.',feat:false},
+    {id:3,title:'Digital Marketing Intern',company:'GrowthX Agency',logo:'📈',bg:'#f0fff8',type:'Full-time',loc:'Mumbai',stip:'₹8,000/mo',dur:'3 months',cat:'Marketing',tags:['SEO','Social Media','Content'],deadline:'May 1, 2026',desc:'Drive digital presence through data-driven marketing campaigns, content creation, and social media management.',feat:false},
+    {id:4,title:'Data Science Intern',company:'Analytiq AI',logo:'🤖',bg:'#fff8f0',type:'Full-time',loc:'Hyderabad',stip:'₹20,000/mo',dur:'6 months',cat:'Tech',tags:['Python','ML','SQL'],deadline:'Apr 18, 2026',desc:'Work on cutting-edge machine learning projects and help build AI-powered products. Strong Python and statistics knowledge required.',feat:true},
+    {id:5,title:'Finance & Accounts Intern',company:'FinEdge Corp',logo:'💰',bg:'#f5fff0',type:'Part-time',loc:'Delhi',stip:'₹12,000/mo',dur:'2 months',cat:'Finance',tags:['Excel','Tally','Accounting'],deadline:'May 5, 2026',desc:'Assist the finance team with bookkeeping, financial analysis, and reporting. Great opportunity for commerce students.',feat:false},
+    {id:6,title:'Mobile App Developer Intern',company:'AppSprint',logo:'📱',bg:'#f0f8ff',type:'Full-time',loc:'Remote',stip:'₹18,000/mo',dur:'4 months',cat:'Tech',tags:['Flutter','Dart','Firebase'],deadline:'Apr 22, 2026',desc:'Build cross-platform mobile applications using Flutter. Own features end-to-end and deploy to production.',feat:false},
+    {id:7,title:'Content & Copywriting Intern',company:'WordCraft Media',logo:'✍️',bg:'#fff3f0',type:'Part-time',loc:'Remote',stip:'₹6,000/mo',dur:'2 months',cat:'Marketing',tags:['Blogging','SEO Writing','Social'],deadline:'May 8, 2026',desc:'Write engaging content for blogs, social media, and marketing materials. A passion for storytelling required.',feat:false},
+    {id:8,title:'Backend Developer Intern',company:'CloudBase Tech',logo:'⚙️',bg:'#f8f0ff',type:'Full-time',loc:'Bangalore',stip:'₹16,000/mo',dur:'3 months',cat:'Tech',tags:['Node.js','MongoDB','REST APIs'],deadline:'Apr 28, 2026',desc:'Build scalable backend services and APIs. Work with a modern tech stack in a fast-paced startup environment.',feat:false},
+  ];
+
+  const APPLICATIONS = [
+    {id:1,status:'interview',date:'Apr 1, 2026'},
+    {id:4,status:'review',date:'Apr 3, 2026'},
+    {id:3,status:'pending',date:'Apr 5, 2026'},
+  ];
+
+  let saved = new Set([2,6]);
+  let applied = new Set(APPLICATIONS.map(a=>a.id));
+  let browseCat = '';
+  let currentView = 'home';
+
+  // STATUS LABELS
+  const STATUS_LABEL = {pending:'Applied',review:'Under Review',interview:'Interview',accepted:'Accepted',rejected:'Rejected'};
+  const STATUS_CLASS = {pending:'sp-pending',review:'sp-review',interview:'sp-interview',accepted:'sp-accepted',rejected:'sp-rejected'};
+
+  function makeCard(intern, showSave=true) {
+    const isSaved = saved.has(intern.id);
+    const isApplied = applied.has(intern.id);
+    return `<div class="i-card ${intern.feat?'feat':''}" onclick="openModal(${intern.id})">
+      ${showSave?`<button class="save-btn ${isSaved?'on':''}" onclick="toggleSave(event,${intern.id})" title="${isSaved?'Unsave':'Save'}">🔖</button>`:''}
+      <div class="i-top">
+        <div class="co-logo" style="background:${intern.feat?'rgba(255,255,255,.2)':intern.bg}">${intern.logo}</div>
+        <div><div class="i-title">${intern.title}</div><div class="i-co">${intern.company}</div></div>
+      </div>
+      <div class="badge-row">
+        <span class="badge bt">${intern.type}</span>
+        <span class="badge bl">${intern.loc}</span>
+        <span class="badge bs">${intern.stip}</span>
+      </div>
+      <div class="i-tags">${intern.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="i-foot">
+        <span class="deadline">Deadline: ${intern.deadline}</span>
+        ${isApplied?`<span class="applied-mark">✓ Applied</span>`:`<button class="apply-btn" onclick="quickApply(event,${intern.id})">Apply Now</button>`}
+      </div>
+    </div>`;
+  }
+
+  function renderHome() {
+    const grid = document.getElementById('home-grid');
+    const list = INTERNSHIPS.filter(i=>i.feat || i.cat==='Tech').slice(0,4);
+    grid.innerHTML = list.map(i=>makeCard(i)).join('');
+  }
+
+  function renderBrowse() {
+    const q = document.getElementById('browse-q').value.toLowerCase();
+    const loc = document.getElementById('browse-loc').value;
+    const list = INTERNSHIPS.filter(i=>{
+      const mq = !q||i.title.toLowerCase().includes(q)||i.company.toLowerCase().includes(q)||i.tags.some(t=>t.toLowerCase().includes(q));
+      const ml = !loc||i.loc===loc;
+      const mc = !browseCat||i.cat===browseCat;
+      return mq&&ml&&mc;
+    });
+    const g=document.getElementById('browse-grid'), e=document.getElementById('browse-empty');
+    if(!list.length){g.innerHTML='';e.style.display='block';return;}
+    e.style.display='none';
+    g.innerHTML=list.map(i=>makeCard(i)).join('');
+  }
+
+  function renderApplications() {
+    const tbody = document.getElementById('app-tbody');
+    if(!APPLICATIONS.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--txm);padding:2rem">No applications yet.</td></tr>';return;}
+    tbody.innerHTML = APPLICATIONS.map(a=>{
+      const i = INTERNSHIPS.find(x=>x.id===a.id);
+      return `<tr>
+        <td><strong>${i.title}</strong></td>
+        <td>${i.company}</td>
+        <td>${a.date}</td>
+        <td><span class="status-pill ${STATUS_CLASS[a.status]}">${STATUS_LABEL[a.status]}</span></td>
+        <td><button style="background:none;border:1px solid #e0d8f5;border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--p);font-weight:500" onclick="openModal(${i.id})">View</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderSaved() {
+    const list = INTERNSHIPS.filter(i=>saved.has(i.id));
+    const g=document.getElementById('saved-grid'), e=document.getElementById('saved-empty');
+    if(!list.length){g.innerHTML='';e.style.display='block';return;}
+    e.style.display='none';
+    g.innerHTML=list.map(i=>makeCard(i)).join('');
+  }
+
+  function setBrowseCat(el, cat) {
+    document.querySelectorAll('#view-browse .filter-chip').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');
+    browseCat = cat;
+    renderBrowse();
+  }
+
+  function toggleSave(e,id){
+    e.stopPropagation();
+    if(saved.has(id)) saved.delete(id); else saved.add(id);
+    refreshAll();
+  }
+
+  function quickApply(e,id){
+    e.stopPropagation();
+    if(!applied.has(id)){
+      applied.add(id);
+      APPLICATIONS.push({id,status:'pending',date:'Apr 8, 2026'});
+    }
+    refreshAll();
+    openModal(id);
+  }
+
+  function refreshAll(){
+    renderHome();
+    renderBrowse();
+    renderSaved();
+    renderApplications();
+  }
+
+  function openModal(id){
+    const i=INTERNSHIPS.find(x=>x.id===id);
+    const isApplied=applied.has(id);
+    const appData = APPLICATIONS.find(a=>a.id===id);
+    document.getElementById('modal-body').innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+        <div style="width:48px;height:48px;border-radius:11px;background:${i.bg};display:flex;align-items:center;justify-content:center;font-size:22px">${i.logo}</div>
+        <div><h2>${i.title}</h2><div class="m-co">${i.company}</div></div>
+      </div>
+      ${appData?`<div style="background:#f0faf5;border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#0a7a4d;font-weight:500">📋 Status: <strong>${STATUS_LABEL[appData.status]}</strong></div>`:''}
+      <div class="info-grid">
+        <div class="info-item"><div class="lbl">Stipend</div><div class="val">${i.stip}</div></div>
+        <div class="info-item"><div class="lbl">Duration</div><div class="val">${i.dur}</div></div>
+        <div class="info-item"><div class="lbl">Type</div><div class="val">${i.type}</div></div>
+        <div class="info-item"><div class="lbl">Location</div><div class="val">${i.loc}</div></div>
+      </div>
+      <p class="m-desc">${i.desc}</p>
+      <div class="m-skills">${i.tags.map(t=>`<span class="tag" style="font-size:12px;padding:5px 11px">${t}</span>`).join('')}</div>
+      <p style="font-size:12px;color:#b0a5c0;margin-bottom:1rem">Application deadline: <strong>${i.deadline}</strong></p>
+      ${isApplied
+        ?`<div style="background:#f0faf5;border-radius:11px;padding:12px;text-align:center;color:#0a7a4d;font-weight:600">✅ You have already applied!</div>`
+        :`<button class="apply-big" onclick="applyModal(${id})">Apply Now</button>`}
+    `;
+    document.getElementById('modal-bg').classList.add('open');
+  }
+
+  function applyModal(id){
+    if(!applied.has(id)){
+      applied.add(id);
+      APPLICATIONS.push({id,status:'pending',date:'Apr 8, 2026'});
+    }
+    closeModal();
+    refreshAll();
+    setTimeout(()=>openModal(id),60);
+  }
+
+  function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+  document.getElementById('modal-bg').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+  function switchView(name, tabEl, sideKey) {
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    document.getElementById('view-'+name).classList.add('on');
+    // nav tabs
+    if(tabEl){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));tabEl.classList.add('on');}
+    // sidebar
+    if(sideKey){document.querySelectorAll('.s-item').forEach(s=>s.classList.remove('on'));}
+    currentView = name;
+    if(name==='browse') renderBrowse();
+    if(name==='saved') renderSaved();
+    if(name==='applications') renderApplications();
+  }
+
+  // Init
+  renderHome();
+  renderBrowse();
+
+  // ================= USER DATA FROM LOGIN =================
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user) {
+  window.location.href = "ctintern_auth.html";
+}
+
+// full name
+const fullName = user.fname + " " + user.lname;
+
+// welcome text
+const welcome = document.getElementById("welcome-text");
+if (welcome) {
+  welcome.innerText = "Welcome back, " + user.fname + "! 👋";
+}
+
+// navbar avatar
+const navAvatar = document.getElementById("nav-avatar");
+if (navAvatar) {
+  navAvatar.innerText = user.fname[0] + user.lname[0];
+}
+
+// profile avatar
+const profileAvatar = document.querySelector(".p-avatar");
+if (profileAvatar) {
+  profileAvatar.innerText = user.fname[0] + user.lname[0];
+}
+
+// profile name
+const profileName = document.getElementById("profile-name");
+if (profileName) {
+  profileName.innerText = fullName;
+}
+
+// profile email
+const profileEmail = document.getElementById("profile-email");
+if (profileEmail) {
+  profileEmail.innerText = user.email;
+}
+
+// logout
+document.getElementById("logout-btn").addEventListener("click", () => {
+  localStorage.removeItem("user");
+  window.location.href = "ctintern_auth.html";
+});
+</script>
+</body>
+</html>
