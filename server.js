@@ -6,6 +6,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 👇 ADD THIS
+app.use(express.static(__dirname));
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
+
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -29,7 +36,7 @@ app.post("/signup", (req, res) => {
   });
 });
 
-// LOGIN  🔥 ADD THIS
+// LOGIN
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
