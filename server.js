@@ -1,55 +1,54 @@
 const express = require("express");
-const mysql = require("mysql2");
+const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// 👇 ADD THIS
 app.use(express.static(__dirname));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "internship_portal"
+mongoose.connect("mongodb+srv://ashiguptagr2004_db_user:RmAdUIAMiDCNFB1z@cluster0.2oaj9wv.mongodb.net/internship-portal?appName=Cluster0")
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
+
+const UserSchema = new mongoose.Schema({
+  fname: String,
+  lname: String,
+  email: { type: String, unique: true },
+  password: String,
+  role: String
 });
 
-db.connect(err => {
-  if (err) throw err;
-  console.log("Database Connected");
-});
+const User = mongoose.model("Users", UserSchema);
 
-// SIGNUP
-app.post("/signup", (req, res) => {
-  const { fname, lname, email, password, role } = req.body;
-
-  const sql = "INSERT INTO users (fname,lname,email,password,role) VALUES (?,?,?,?,?)";
-  db.query(sql, [fname, lname, email, password, role], (err, result) => {
-    if (err) return res.status(500).send(err);
+app.post("/signup", async (req, res) => {
+  try {
+    const user = new User(req.body);
+    await user.save();
     res.send("User Registered");
-  });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
-// LOGIN
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const sql = "SELECT * FROM users WHERE email=? AND password=?";
-  db.query(sql, [email, password], (err, result) => {
-    if (err) return res.status(500).send(err);
+  try {
+    const user = await User.findOne({ email, password });
 
-    if (result.length > 0) {
-      res.send({ success: true, user: result[0] });
+    if (user) {
+      res.send({ success: true, user });
     } else {
       res.send({ success: false });
     }
-  });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 app.listen(3000, () => {
